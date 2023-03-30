@@ -61,7 +61,7 @@ def lambda_handler(event, context):
                 enJWT = jwt.encode({"role": role}, jwtKey, algorithm='HS256')
                 response = {
                     "statusCode": 200,
-                    "body" : json.dumps({ "data" : enJWT })
+                    "body" : json.dumps({ "data" : enJWT, "fulanito" : "de tal" })
                 }
             else:
                 response = {
