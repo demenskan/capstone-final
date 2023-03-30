@@ -10,34 +10,34 @@ variable "aws_region" {
   default = "us-west-1"
 }
 
-variable "db_host" {
-    description = "the RDS endpoint"
-    type = string
-}
-
-variable "db_user" {
-    description = "the database's user"
-    type = string
-}
-
-variable "db_name" {
-    description = "the database's name"
-    type = string
-}
-
-variable "db_pass" {
-    description = "the db pass"
-    type = string
-}
-
-variable "jwt_key" {
-    description = "the JWT key"
-    type = string
-}
-
-variable "developer" {
-    description = "ichi ban inu"
-    type = string
-}
-
+#variable "db_host" {
+#    description = "the RDS endpoint"
+#    type = string
+#}
+#
+#variable "db_user" {
+#    description = "the database's user"
+#    type = string
+#}
+#
+#variable "db_name" {
+#    description = "the database's name"
+#    type = string
+#}
+#
+#variable "db_pass" {
+#    description = "the db pass"
+#    type = string
+#}
+#
+#variable "jwt_key" {
+#    description = "the JWT key"
+#    type = string
+#}
+#
+#variable "developer" {
+#    description = "ichi ban inu"
+#    type = string
+#}
+#
 
