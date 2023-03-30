@@ -4,44 +4,43 @@ import sys
 import logging
 import pymysql
 import json
-import os
+import boto3
+import base64
 # test => curl -X POST -H "Content-Type: application/json" -d '{"username": "admin", "password" : "secret"}' https://rsa3qcz20m.execute-api.us-west-1.amazonaws.com/Prod/list
+secret_name="capstone-creds"
+region_name="us-west-1"
+#Set up our Session and Client
+session = boto3.session.Session()
+client = session.client(
+    service_name='secretsmanager',
+    region_name=region_name
+)
+get_secret_value_response = client.get_secret_value(SecretId=secret_name)
+secrets=json.loads(get_secret_value_response['SecretString'])
+rds_host  = secrets['db_host']
+user_name = secrets['db_user']
+password = secrets['db_pass']
+db_name = secrets['db_name']
+jwtKey= secrets['jwt_key']
 
-# rds settings
-"""
-rds_host  = os.environ['DB_HOST']
-user_name = os.environ['DB_USER']
-password = os.environ['DB_PASS']
-db_name = os.environ['DB_NAME']
-"""
-rds_host  = "mysqlforlambda.cbm6k6ibrhug.us-west-1.rds.amazonaws.com"
-user_name = "admin"
-password = "Polloloco88$"
-db_name = "ExampleDB"
-
-
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-
+logger.info("user: [" + secrets['db_user'] + "]" )
+#logger.info(json.dumps(get_secret_value_response))
 # create the database connection outside of the handler to allow connections to be
 # re-used by subsequent function invocations.
+"""
 try:
     conn = pymysql.connect(host=rds_host, user=user_name, passwd=password, db=db_name, connect_timeout=5)
 except pymysql.MySQLError as e:
     logger.error("ERROR: Unexpected error: Coud not connect to MySQL instance.")
     logger.error(e)
     sys.exit()
-
+"""
 logger.info("SUCCESS: Connection to RDS MySQL instance succeeded")
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 def lambda_handler(event, context):
-    """
-    This function creates a new RDS database table and writes records to it
-    """
-    #jwtKey=os.environ["JWT_KEY"]
-    jwtKey="my2w7wjd7yXF64FIADfJxNs1oupTGAuW"
 
     with conn.cursor() as cur:
         logger.info(event)

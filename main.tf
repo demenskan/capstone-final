@@ -143,6 +143,29 @@ resource "aws_cloudwatch_log_group" "login" {
   retention_in_days = 30
 }
 
+resource "aws_iam_policy" "secrets_access" {
+  name        = "secrets_access"
+  path        = "/"
+  description = "Access to secrets"
+  # Terraform's "jsonencode" function converts a
+  # Terraform expression result to valid JSON syntax.
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "kms:Decrypt"
+        ]
+        Effect   = "Allow"
+        Resource = "arn:aws:secretsmanager:us-west-1:900510214286:secret:capstone-creds-yvkEMx"
+      },
+    ]
+  })
+}
+
+
+
 resource "aws_iam_role" "lambda_exec" {
   name = "serverless_lambda"
 
@@ -165,6 +188,11 @@ resource "aws_iam_role" "lambda_exec" {
 resource "aws_iam_role_policy_attachment" "lambda_policy" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "secret_policy" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = aws_iam_policy.secrets_access.arn
 }
 
 ######
@@ -287,6 +315,4 @@ resource "aws_lambda_permission" "api_gw_login" {
   principal     = "apigateway.amazonaws.com"
   source_arn = "${aws_apigatewayv2_api.lambda.execution_arn}/*/*"
 }
-
-
 

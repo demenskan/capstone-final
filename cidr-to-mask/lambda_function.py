@@ -5,6 +5,8 @@ import json
 import os
 import socket
 import struct
+import boto3
+import base64
 #from ipaddress import IPv4Network
 #e.g. curl -H "Accept: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4ifQ.StuYX978pQGnCeeaj2E1yBYwQvZIodyDTCJWXdsxBGI" https://rsa3qcz20m.execute-api.us-west-1.amazonaws.com/Prod/cidr-to-mask?value=30
 logger = logging.getLogger()
@@ -16,8 +18,23 @@ def lambda_handler(event, context):
     This function gets a mask and returns a cidr prefix
     there must be a valid JWT on the header
     """
-    #jwt_key=os.environ['JWT_KEY']
-    jwt_key="my2w7wjd7yXF64FIADfJxNs1oupTGAuW"
+    secret_name="capstone-creds"
+    region_name="us-west-1"
+
+    #Set up our Session and Client
+    session = boto3.session.Session()
+    client = session.client(
+        service_name='secretsmanager',
+        region_name=region_name
+    )
+
+    get_secret_value_response = client.get_secret_value(SecretId=secret_name)
+    secrets=json.loads(get_secret_value_response['SecretString'])
+    #logger.info("secret: [" + str(get_secret_value_response) + "]" )
+    #logger.info("user: [" + secrets['db_user'] + "]" )
+
+    jwt_key= secrets['jwt_key']
+
     try:
         prefix=int(event["queryStringParameters"]["value"])
         logger.info("prefix" + str(prefix))
