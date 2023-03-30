@@ -6,25 +6,16 @@ import pymysql
 import json
 import boto3
 import base64
+import os
 # test => curl -X POST -H "Content-Type: application/json" -d '{"username": "admin", "password" : "secret"}' https://rsa3qcz20m.execute-api.us-west-1.amazonaws.com/Prod/list
 #logger.info(json.dumps(get_secret_value_response))
 # create the database connection outside of the handler to allow connections to be
 # re-used by subsequent function invocations.
-secret_name="capstone-creds"
-region_name="us-west-1"
-#Set up our Session and Client
-session = boto3.session.Session()
-client = session.client(
-    service_name='secretsmanager',
-    region_name=region_name
-)
-get_secret_value_response = client.get_secret_value(SecretId=secret_name)
-secrets=json.loads(get_secret_value_response['SecretString'])
-rds_host  = secrets['db_host']
-user_name = secrets['db_user']
-password = secrets['db_pass']
-db_name = secrets['db_name']
-jwtKey= secrets['jwt_key']
+rds_host  = os.environ['db_host']
+user_name = os.environ['db_user']
+password = os.environ['db_pass']
+db_name = os.environ['db_name']
+jwtKey= os.environ['jwt_key']
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -65,6 +56,7 @@ def lambda_handler(event, context):
             hashed_pass=hashlib.sha512((password+salt).encode()).hexdigest()
             logger.info("hashed pass:" + hashed_pass)
             logger.info("pass db:" + passwd_db)
+            logger.info("developer: " + os.environ['developer'])
             if passwd_db==hashed_pass:
                 enJWT = jwt.encode({"role": role}, jwtKey, algorithm='HS256')
                 response = {

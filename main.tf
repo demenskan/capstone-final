@@ -12,6 +12,20 @@ provider "aws" {
 
 }
 
+# read service user secret
+data "aws_secretsmanager_secret" "capstone_creds" {
+  arn = "arn:aws:secretsmanager:us-west-1:900510214286:secret:capstone-creds-yvkEMx"
+}
+
+data "aws_secretsmanager_secret_version" "capstone_creds" {
+  secret_id = data.aws_secretsmanager_secret.capstone_creds.id
+}
+
+locals {
+    capstone_creds=jsondecode(data.aws_secretsmanager_secret_version.capstone_creds.secret_string)
+}
+
+
 resource "random_pet" "lambda_bucket_name" {
   prefix = "learn-terraform-functions"
   length = 4
@@ -116,10 +130,20 @@ resource "aws_lambda_function" "login" {
   handler = "lambda_function.lambda_handler"
   source_code_hash = data.archive_file.lambda_login.output_base64sha256
   role = aws_iam_role.lambda_exec.arn
-  #vpc_config {
-  #  subnet_ids = ["subnet-0951be4b7566d0bc1","subnet-048ac37137f653270"]
-  #  security_group_ids = ["sg-01cf4c35e9bd3c2c6"]
-  #}
+  vpc_config {
+    subnet_ids = ["subnet-0951be4b7566d0bc1","subnet-048ac37137f653270"]
+    security_group_ids = ["sg-01cf4c35e9bd3c2c6"]
+  }
+  environment {
+    variables = {
+        db_host = local.capstone_creds.db_host
+        db_user = local.capstone_creds.db_user
+        db_pass = local.capstone_creds.db_pass
+        db_name = local.capstone_creds.db_name
+        jwt_key = local.capstone_creds.jwt_key
+        developer = local.capstone_creds.developer
+    }
+  }
 }
 
 
@@ -342,4 +366,5 @@ resource "aws_lambda_permission" "api_gw_login" {
   principal     = "apigateway.amazonaws.com"
   source_arn = "${aws_apigatewayv2_api.lambda.execution_arn}/*/*"
 }
+
 
