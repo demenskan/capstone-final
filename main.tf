@@ -210,7 +210,7 @@ resource "aws_iam_policy" "ec2_permissions" {
         Action = [
           "ec2:CreateNetworkInterface",
           "ec2:DescribeNetworkInterfaces",
-	  "ec2:DeleteNetworkInterface"
+          "ec2:DeleteNetworkInterface"
         ]
         Effect   = "Allow"
         Resource = "*"
@@ -219,11 +219,8 @@ resource "aws_iam_policy" "ec2_permissions" {
   })
 }
 
-
-
 resource "aws_iam_role" "lambda_exec" {
   name = "serverless_lambda"
-
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -237,7 +234,6 @@ resource "aws_iam_role" "lambda_exec" {
     ]
   })
 }
-# 
 
 
 resource "aws_iam_role_policy_attachment" "lambda_policy" {
