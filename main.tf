@@ -116,10 +116,10 @@ resource "aws_lambda_function" "login" {
   handler = "lambda_function.lambda_handler"
   source_code_hash = data.archive_file.lambda_login.output_base64sha256
   role = aws_iam_role.lambda_exec.arn
-  vpc_config {
-    subnet_ids = ["subnet-0951be4b7566d0bc1","subnet-048ac37137f653270"]
-    security_group_ids = ["sg-01cf4c35e9bd3c2c6"]
-  }
+  #vpc_config {
+  #  subnet_ids = ["subnet-0951be4b7566d0bc1","subnet-048ac37137f653270"]
+  #  security_group_ids = ["sg-01cf4c35e9bd3c2c6"]
+  #}
 }
 
 
@@ -164,6 +164,28 @@ resource "aws_iam_policy" "secrets_access" {
   })
 }
 
+resource "aws_iam_policy" "ec2_permissions" {
+  name        = "ec2_permissions"
+  path        = "/"
+  description = "permissions to EC2 for the DB"
+  # Terraform's "jsonencode" function converts a
+  # Terraform expression result to valid JSON syntax.
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "ec2:CreateNetworkInterface",
+          "ec2:DescribeNetworkInterfaces",
+	  "ec2:DeleteNetworkInterface"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      },
+    ]
+  })
+}
+
 
 
 resource "aws_iam_role" "lambda_exec" {
@@ -182,7 +204,7 @@ resource "aws_iam_role" "lambda_exec" {
     ]
   })
 }
-# "ec2:CreateNetworkInterface"
+# 
 
 
 resource "aws_iam_role_policy_attachment" "lambda_policy" {
@@ -193,6 +215,11 @@ resource "aws_iam_role_policy_attachment" "lambda_policy" {
 resource "aws_iam_role_policy_attachment" "secret_policy" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = aws_iam_policy.secrets_access.arn
+}
+
+resource "aws_iam_role_policy_attachment" "ec2_policy" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = aws_iam_policy.ec2_permissions.arn
 }
 
 ######

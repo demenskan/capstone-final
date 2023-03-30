@@ -7,6 +7,9 @@ import json
 import boto3
 import base64
 # test => curl -X POST -H "Content-Type: application/json" -d '{"username": "admin", "password" : "secret"}' https://rsa3qcz20m.execute-api.us-west-1.amazonaws.com/Prod/list
+#logger.info(json.dumps(get_secret_value_response))
+# create the database connection outside of the handler to allow connections to be
+# re-used by subsequent function invocations.
 secret_name="capstone-creds"
 region_name="us-west-1"
 #Set up our Session and Client
@@ -22,26 +25,19 @@ user_name = secrets['db_user']
 password = secrets['db_pass']
 db_name = secrets['db_name']
 jwtKey= secrets['jwt_key']
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
-logger.info("user: [" + secrets['db_user'] + "]" )
-#logger.info(json.dumps(get_secret_value_response))
-# create the database connection outside of the handler to allow connections to be
-# re-used by subsequent function invocations.
-"""
 try:
     conn = pymysql.connect(host=rds_host, user=user_name, passwd=password, db=db_name, connect_timeout=5)
 except pymysql.MySQLError as e:
     logger.error("ERROR: Unexpected error: Coud not connect to MySQL instance.")
     logger.error(e)
     sys.exit()
-"""
 logger.info("SUCCESS: Connection to RDS MySQL instance succeeded")
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
 
 
 def lambda_handler(event, context):
-
     with conn.cursor() as cur:
         logger.info(event)
         #logger.info(event['body'])
@@ -86,4 +82,3 @@ def lambda_handler(event, context):
                 "body" : json.dumps("wrong")
             }
     return response
-
