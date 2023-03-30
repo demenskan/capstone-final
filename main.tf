@@ -25,16 +25,16 @@ locals {
     capstone_creds=jsondecode(data.aws_secretsmanager_secret_version.capstone_creds.secret_string)
 }
 
-terraform {
-    backend "s3" {
-        bucket         = "sre-bootcamp-demenskan-tfstate"
-        key            = "global/s3/terraform.tfstate"
-        region         = "us-west-1"
-
-        dynamodb_table = "sre-bootcamp-demenskan-locks"
-        encrypt        = true
-    }
-}
+#terraform {
+#    backend "s3" {
+#        bucket         = "skan-tfstate"
+#        key            = "global/s3/terraform.tfstate"
+#        region         = "us-west-1"
+#
+#        dynamodb_table = "sre-bootcamp-demenskan-locks"
+#        encrypt        = true
+#    }
+#}
 resource "random_pet" "lambda_bucket_name" {
   prefix = "learn-terraform-functions"
   length = 4
