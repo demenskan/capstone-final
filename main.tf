@@ -30,7 +30,6 @@ locals {
 #        bucket         = "skan-tfstate"
 #        key            = "global/s3/terraform.tfstate"
 #        region         = "us-west-1"
-#
 #        dynamodb_table = "sre-bootcamp-demenskan-locks"
 #        encrypt        = true
 #    }
