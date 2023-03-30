@@ -28,8 +28,10 @@ jobs:
         aws-region: us-west-1
 
     - name: Initialize Terraform
-      run: terraform init
-
+      run: terraform init \
+        -backend-config="bucket=sre-bootcamp-demenskan-tfstate" \
+        -backend-config="key=global/s3/terraform.tfstate" \
+        -backend-config="region=us-west-1"
     - name: Apply Terraform
       run: terraform apply -auto-approve
       env:
